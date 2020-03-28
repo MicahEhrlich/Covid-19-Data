@@ -1,0 +1,13 @@
+.App {
+  text-align: center;
+}
+
+.world-total {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: baseline;
+  align-content: space-between;
+  padding: 5px;
+}
