@@ -14,10 +14,33 @@ import { green, red, yellow } from '@material-ui/core/colors';
 
 import { COUNTRIES_DATA_API, TOTAL_CASES_API } from '../../constants';
 
+function tabDataStyle(color) {
+  return {
+    color: 'white',
+    backgroundColor: color,
+    marginLeft: '6px',
+    paddingRight: '4px',
+    marginRight: '10px',
+    minWidth: '230px'
+  };
+}
+
+function selectedStyle(color) {
+  return {
+    color: 'white',
+    backgroundColor: color
+  };
+}
+
 const Home = () => {
   const [data, setData] = useState({});
   const [unsortedData, setUnsortedData] = useState([]);
   const [total, setTotal] = useState([]);
+  const [lastUpdate, setLastUpdate] = useState('');
+  const [selected, setSelected] = useState({
+    text: 'Confirmed',
+    color: 'goldenrod'
+  });
 
   const sortDataByDeaths = () => {
     unsortedData.sort((a, b) => (a.deaths < b.deaths ? 1 : -1));
@@ -50,6 +73,10 @@ const Home = () => {
       ]
     };
     setData(tempData);
+    setSelected({
+      text: 'Deaths',
+      color: 'darkred'
+    });
   };
 
   const sortDataByRecovered = () => {
@@ -83,6 +110,10 @@ const Home = () => {
       ]
     };
     setData(tempData);
+    setSelected({
+      text: 'Recovered',
+      color: 'green'
+    });
   };
 
   const sortDataByConfirmed = () => {
@@ -117,6 +148,10 @@ const Home = () => {
       ]
     };
     setData(tempData);
+    setSelected({
+      text: 'Confirmed',
+      color: 'goldenrod'
+    });
   };
 
   const getCoronaData = async () => {
@@ -125,6 +160,10 @@ const Home = () => {
 
     const res = await axios.get(COUNTRIES_DATA_API);
     setUnsortedData(res.data);
+
+    let lastUpdate = new Date(res.data[0].lastupdate);
+
+    setLastUpdate(lastUpdate.toString());
 
     let labels = [];
     let confirmed = [];
@@ -138,8 +177,6 @@ const Home = () => {
     }
 
     labels.push('Others');
-
-    console.log(resTotal.data.confirmed - confirmed.reduce((a, b) => a + b, 0));
 
     confirmed.push(
       resTotal.data.confirmed - confirmed.reduce((a, b) => a + b, 0)
@@ -173,41 +210,26 @@ const Home = () => {
       <Container>
         <div className='world-total'>
           <Button onClick={sortDataByConfirmed}>
-            <Paper
-              style={{
-                backgroundColor: 'goldenrod',
-                minWidth: 100,
-                marginLeft: '6px',
-                paddingRight: '4px',
-                marginRight: '10px'
-              }}
-              elevation={3}>
-              <div>
-                <h3>
-                  <LocalHospitalIcon
-                    fontSize='large'
-                    style={{ color: yellow[500] }}
-                  />
-                  Confirmed {total.confirmed}
-                </h3>
-              </div>
+            <Paper elevation={3} style={tabDataStyle('goldenrod')}>
+              <h3>
+                <LocalHospitalIcon
+                  fontSize='large'
+                  style={{ paddingRight: '8px', color: yellow[500] }}
+                />
+                Confirmed {total.confirmed}
+              </h3>
             </Paper>
           </Button>
           <Button onClick={sortDataByDeaths}>
-            <Paper
-              onClick={sortDataByDeaths}
-              style={{
-                backgroundColor: 'darkred',
-                minWidth: 100,
-                paddingRight: '4px',
-                marginRight: '10px'
-              }}
-              elevation={3}>
+            <Paper style={tabDataStyle('darkred')} elevation={3}>
               <div>
                 <h3>
                   <SentimentDissatisfiedRoundedIcon
                     fontSize='large'
-                    style={{ color: red[500] }}
+                    style={{
+                      marginRight: '54px',
+                      color: red[500]
+                    }}
                   />
                   Deaths {total.deaths}
                 </h3>
@@ -215,19 +237,15 @@ const Home = () => {
             </Paper>
           </Button>
           <Button onClick={sortDataByRecovered}>
-            <Paper
-              style={{
-                backgroundColor: 'green',
-                minWidth: 100,
-                paddingRight: '4px',
-                marginRight: '10px'
-              }}
-              elevation={3}>
+            <Paper style={tabDataStyle('green')} elevation={3}>
               <div>
                 <h3>
                   <FavoriteIcon
                     fontSize='large'
-                    style={{ color: green[500] }}
+                    style={{
+                      paddingRight: '8px',
+                      color: green[500]
+                    }}
                   />
                   Recovered {total.recovered}
                 </h3>
@@ -235,9 +253,17 @@ const Home = () => {
             </Paper>
           </Button>
         </div>
-        <div>
+        <Container style={{ width: '350px' }}>
+          <Paper style={selectedStyle(selected.color)} elevation={3}>
+            <h4>{selected.text}</h4>
+          </Paper>
+        </Container>
+        <div style={{ color: 'white' }}>
           <Chart type='pie' data={data} />
         </div>
+        <h4 style={{ paddingTop: '40px', textAlign: 'left', color: 'white' }}>
+          Last Update: {lastUpdate}
+        </h4>
       </Container>
     </div>
   );
